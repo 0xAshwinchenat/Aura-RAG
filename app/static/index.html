@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA RAG - Document-Agnostic RAG System</title>
+    <meta name="description" content="A premium, document-agnostic Retrieval-Augmented Generation system with precise citation grounding and evaluation suite.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+    <!-- Neon Background Glows -->
+    <div class="glow-bg glow-primary"></div>
+    <div class="glow-bg glow-secondary"></div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
+                <div class="logo-text">AURA<span>RAG</span></div>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" id="btn-tab-ingest" onclick="switchTab('ingest')">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Ingest Docs
+                </button>
+                <button class="nav-item" id="btn-tab-chat" onclick="switchTab('chat')">
+                    <i class="fa-solid fa-comments"></i> RAG Playground
+                </button>
+                <button class="nav-item" id="btn-tab-eval" onclick="switchTab('eval')">
+                    <i class="fa-solid fa-chart-line"></i> Evaluation
+                </button>
+                <button class="nav-item" id="btn-tab-config" onclick="switchTab('config')">
+                    <i class="fa-solid fa-sliders"></i> Configuration
+                </button>
+            </nav>
+            <div class="system-status-badge">
+                <span class="status-indicator online"></span>
+                <span id="status-model-text">Gemini Active</span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- TAB 1: DOCUMENT INGESTION -->
+            <section id="tab-ingest" class="tab-pane active">
+                <div class="pane-header">
+                    <h1>Document Ingestion</h1>
+                    <p>Upload files of mixed formats (PDF, DOCX, PPTX, XLSX, CSV, HTML, MD, TXT, EML). We automatically detect MIME signatures, parse, chunk, embed, and index them.</p>
+                </div>
+
+                <div class="ingest-grid">
+                    <!-- Ingest Drag & Drop -->
+                    <div class="glass-card upload-container" id="drop-zone">
+                        <input type="file" id="file-input" multiple style="display: none;">
+                        <div class="upload-icon"><i class="fa-solid fa-file-import"></i></div>
+                        <h3>Drag & drop documents here</h3>
+                        <p>or <span class="browse-link" onclick="document.getElementById('file-input').click()">browse files</span> from your computer</p>
+                        <span class="file-limits">Supports up to 20 files per batch. Signatures verified automatically.</span>
+                    </div>
+
+                    <!-- Ingestion Status Panel -->
+                    <div class="glass-card status-panel">
+                        <div class="card-header">
+                            <h3>Ingestion Queue / History</h3>
+                            <button class="btn btn-danger btn-sm" id="btn-clear-store" onclick="clearStore()">
+                                <i class="fa-solid fa-trash-can"></i> Clear Index
+                            </button>
+                        </div>
+                        <div class="queue-list" id="ingest-queue">
+                            <div class="empty-queue-message">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <p>No files ingested in this session yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: RAG PLAYGROUND (CHAT) -->
+            <section id="tab-chat" class="tab-pane">
+                <div class="playground-layout">
+                    <!-- Chat Area -->
+                    <div class="glass-card chat-container">
+                        <div class="chat-header">
+                            <div class="chat-title-info">
+                                <h3>Grounded Assistant</h3>
+                                <span class="subtitle">Answering strictly based on retrieved documents</span>
+                            </div>
+                            <div class="chat-config-summary">
+                                <span class="badge" id="chat-badge-provider">Gemini</span>
+                                <span class="badge" id="chat-badge-chunks">k=5</span>
+                            </div>
+                        </div>
+                        <div class="chat-messages" id="chat-messages-box">
+                            <div class="message system-message">
+                                <div class="message-avatar"><i class="fa-solid fa-robot"></i></div>
+                                <div class="message-content">
+                                    <p>Hello! Ask me any question. I will search the ingested documents and answer you, citing the exact sources. If the answer cannot be found in your documents, I will refuse to hallucinate.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <textarea id="chat-input" placeholder="Ask a question about your documents... (Shift + Enter for new line)" rows="1"></textarea>
+                            <button id="btn-send-chat" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: Context & Citations -->
+                    <div class="glass-card citation-sidebar">
+                        <div class="sidebar-header">
+                            <h3>Retrieved Chunks & Citations</h3>
+                            <span class="subtitle">Grounding evidence for the last response</span>
+                        </div>
+                        <div class="citation-list" id="citations-panel">
+                            <div class="empty-sidebar-message">
+                                <i class="fa-solid fa-quote-right"></i>
+                                <p>Ask a question to view retrieved chunks and specific document citations here.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: SYSTEM EVALUATION -->
+            <section id="tab-eval" class="tab-pane">
+                <div class="pane-header">
+                    <h1>RAG System Evaluation</h1>
+                    <p>Run the automated evaluation suite against a curated set of multi-format grounding questions. Evaluates retrieval accuracy (Recall@K) and answer quality (Groundedness & Citation Accuracy) using LLM-as-a-judge.</p>
+                </div>
+
+                <div class="eval-layout">
+                    <!-- Run Panel -->
+                    <div class="glass-card eval-run-panel">
+                        <h3>Run Evaluator</h3>
+                        <p>This runs our author-defined QA dataset (spanning PDF, Docx, PPTx, Excel, CSV, EML, Markdown, and TXT) through the current ingestion database.</p>
+                        
+                        <div class="form-group inline-form">
+                            <label for="eval-k">Retrieval K:</label>
+                            <input type="number" id="eval-k" value="5" min="1" max="10">
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" id="btn-run-eval" onclick="runEvaluation()">
+                            <i class="fa-solid fa-play"></i> Execute Evaluation Suite
+                        </button>
+                        
+                        <div class="eval-progress-indicator" id="eval-loading" style="display: none;">
+                            <div class="spinner"></div>
+                            <p>Running pipeline and LLM judge evaluations... (takes ~15-20 seconds)</p>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Dashboard -->
+                    <div class="glass-card eval-metrics-panel">
+                        <h3>Aggregated Metrics</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <span class="metric-label">Retrieval Recall@K</span>
+                                <span class="metric-value" id="metric-recall">--</span>
+                                <span class="metric-desc">Expected docs returned in top-k</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-label">Groundedness Score</span>
+                                <span class="metric-value" id="metric-grounded">--</span>
+                                <span class="metric-desc">Judge score (1-5, no hallucinations)</span>
+                            </div>
+                            <div class="metric-card">
+                                <span class="metric-label">Citation Accuracy</span>
+                                <span class="metric-value" id="metric-citations">--</span>
+                                <span class="metric-desc">Judge score (1-5, correct linkages)</span>
+                            </div>
+                        </div>
+                        <div class="last-run-timestamp" id="eval-timestamp-text">Last run: Never</div>
+                    </div>
+                </div>
+
+                <!-- Case-by-Case Breakdown -->
+                <div class="glass-card eval-details-card">
+                    <div class="card-header">
+                        <h3>Detailed Test Case Performance</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="eval-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Question</th>
+                                    <th>Expected Sources</th>
+                                    <th>Recall@K</th>
+                                    <th>Groundedness (1-5)</th>
+                                    <th>Citations (1-5)</th>
+                                    <th>Latency</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eval-table-body">
+                                <tr>
+                                    <td colspan="8" class="text-center">No evaluation results loaded. Run evaluation to see data.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: CONFIGURATION -->
+            <section id="tab-config" class="tab-pane">
+                <div class="pane-header">
+                    <h1>System Configuration</h1>
+                    <p>Adjust system-wide parameters, switch LLM models, and configure chunk limits dynamically at runtime.</p>
+                </div>
+
+                <div class="config-layout">
+                    <div class="glass-card config-card">
+                        <h3>RAG Settings</h3>
+                        <div class="config-form">
+                            <!-- Model Provider -->
+                            <div class="form-group">
+                                <label for="config-provider">Active LLM & Embeddings Provider</label>
+                                <select id="config-provider" onchange="toggleProviderSettings()">
+                                    <option value="gemini">Google Gemini API (Recommended)</option>
+                                    <option value="openai">OpenAI API</option>
+                                </select>
+                                <span class="form-help">Requires the corresponding environment variable to be set (GEMINI_API_KEY or OPENAI_API_KEY).</span>
+                            </div>
+
+                            <!-- Models Config -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="config-gemini-model">Gemini Model</label>
+                                    <input type="text" id="config-gemini-model" value="gemini-1.5-flash">
+                                </div>
+                                <div class="form-group">
+                                    <label for="config-openai-model">OpenAI Model</label>
+                                    <input type="text" id="config-openai-model" value="gpt-4o-mini">
+                                </div>
+                            </div>
+
+                            <!-- Chunk Settings -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="config-chunk-size">Chunk Size (characters)</label>
+                                    <input type="number" id="config-chunk-size" value="1000" min="100" max="5000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="config-chunk-overlap">Chunk Overlap (characters)</label>
+                                    <input type="number" id="config-chunk-overlap" value="200" min="0" max="1000">
+                                </div>
+                            </div>
+
+                            <!-- Submit -->
+                            <button class="btn btn-primary" onclick="saveConfiguration()">
+                                <i class="fa-solid fa-floppy-disk"></i> Save Configurations
+                            </button>
+                            <span id="config-save-toast" class="toast-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card environment-info-card">
+                        <h3>Environment & Index Status</h3>
+                        <table class="status-table">
+                            <tr>
+                                <td>Vector Store Location</td>
+                                <td id="status-store-path">--</td>
+                            </tr>
+                            <tr>
+                                <td>Total Ingested Chunks</td>
+                                <td id="status-store-chunks">0</td>
+                            </tr>
+                            <tr>
+                                <td>OpenAI Key Configured</td>
+                                <td id="status-openai-key"><i class="fa-solid fa-circle-xmark status-err"></i> No</td>
+                            </tr>
+                            <tr>
+                                <td>Gemini Key Configured</td>
+                                <td id="status-gemini-key"><i class="fa-solid fa-circle-xmark status-err"></i> No</td>
+                            </tr>
+                        </table>
+                        
+                        <div class="security-warning-box">
+                            <h4><i class="fa-solid fa-shield-halved"></i> Security Notice</h4>
+                            <p>Document content is treated as untrusted input. Prompt injections embedded in document text are isolated inside delimiters, and system instructions prevent the model from executing them. Make sure to read details in the README.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Case Modal (for viewing evaluation case details) -->
+    <div class="modal" id="case-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Evaluation Case Detail</h3>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body-content">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

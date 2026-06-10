@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "question": "What is the remote work allowance amount?",
+    "expected_sources": ["company_policy.pdf"],
+    "expected_answer": "The remote work allowance is $500 per year."
+  },
+  {
+    "id": 2,
+    "question": "What was the Q3 revenue and net profit?",
+    "expected_sources": ["quarterly_earnings.xlsx"],
+    "expected_answer": "Q3 revenue was $4.2M and net profit was $850k."
+  },
+  {
+    "id": 3,
+    "question": "When is Version 2.0 scheduled to be released?",
+    "expected_sources": ["product_roadmap.pptx"],
+    "expected_answer": "Version 2.0 is scheduled for release in Q4 2026."
+  },
+  {
+    "id": 4,
+    "question": "What is the naming convention for git branches?",
+    "expected_sources": ["engineering_handbook.docx"],
+    "expected_answer": "Git branch names must follow feature/feature-name or bugfix/bug-name."
+  },
+  {
+    "id": 5,
+    "question": "What is the door code for the office?",
+    "expected_sources": ["notes.txt"],
+    "expected_answer": "The office door code is 9081#."
+  },
+  {
+    "id": 6,
+    "question": "Why was the customer unable to log in according to the support email?",
+    "expected_sources": ["support_ticket.eml"],
+    "expected_answer": "The customer was unable to log in because port 443 was blocked."
+  }
+]

@@ -1,0 +1,29 @@
+# Virtual Environment
+.venv/
+.env/
+env/
+ENV/
+
+# Local configuration / API keys
+.env
+
+# Python caching
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Local storage and database
+vector_store.json
+temp_uploads/
+test_files/
+data/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
