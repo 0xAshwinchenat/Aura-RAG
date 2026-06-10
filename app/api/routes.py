@@ -83,7 +83,11 @@ async def ingest_documents(files: List[UploadFile] = File(...)):
     generates embeddings, and saves them to the vector store.
     """
     temp_dir = "temp_uploads"
-    os.makedirs(temp_dir, exist_ok=True)
+    try:
+        os.makedirs(temp_dir, exist_ok=True)
+    except OSError:
+        temp_dir = "/tmp/temp_uploads"
+        os.makedirs(temp_dir, exist_ok=True)
     
     results = []
     
@@ -356,8 +360,10 @@ async def clear_store():
     try:
         vector_store = get_vector_store(settings.vector_store_path)
         vector_store.clear()
-        # Save empty store to clear the file
-        vector_store.save(settings.vector_store_path)
+        try:
+            vector_store.save(settings.vector_store_path)
+        except OSError as e:
+            logger.warning(f"Could not write cleared vector store to disk (expected in read-only environments like Vercel): {e}")
         return {"status": "success", "message": "Vector store cleared."}
     except Exception as e:
         logger.error(f"Failed to clear store: {e}")
@@ -384,6 +390,8 @@ async def get_evaluation_results():
     """
     import json
     results_path = "data/eval_results.json"
+    if not os.path.exists(results_path):
+        results_path = "/tmp/data/eval_results.json"
     if not os.path.exists(results_path):
         raise HTTPException(status_code=404, detail="No evaluation results found. Run evaluation first.")
     try:

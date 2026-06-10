@@ -263,8 +263,13 @@ class RAGEvaluator:
         }
         
         # Save results to disk
-        os.makedirs("data", exist_ok=True)
-        with open("data/eval_results.json", 'w', encoding='utf-8') as f:
+        eval_dir = "data"
+        try:
+            os.makedirs(eval_dir, exist_ok=True)
+        except OSError:
+            eval_dir = "/tmp/data"
+            os.makedirs(eval_dir, exist_ok=True)
+        with open(os.path.join(eval_dir, "eval_results.json"), 'w', encoding='utf-8') as f:
             json.dump(summary, f, ensure_ascii=False, indent=2)
             
         logger.info("Evaluation completed successfully.")
