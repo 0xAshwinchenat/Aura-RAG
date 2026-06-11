@@ -73,8 +73,8 @@ class GeminiLLMClient(LLMClient):
         candidates = [self.model_name]
         if self.model_name != "gemini-2.0-flash":
             candidates.append("gemini-2.0-flash")
-        if self.model_name != "gemini-1.5-flash":
-            candidates.append("gemini-1.5-flash")
+        if self.model_name != "gemini-2.0-flash-lite":
+            candidates.append("gemini-2.0-flash-lite")
         return candidates
 
     def generate_answer(self, query: str, chunks: List[DocumentChunk]) -> Dict[str, Any]:

@@ -94,7 +94,7 @@ async def ingest_documents(files: List[UploadFile] = File(...)):
     # 1. Get embedding client & vector store
     try:
         embedder = get_embedding_client()
-        vector_store = get_vector_store(settings.vector_store_path)
+        vector_store = get_vector_store(settings.resolved_vector_store_path)
     except Exception as e:
         logger.error(f"Failed to initialize embedding client or vector store: {e}")
         raise HTTPException(status_code=500, detail=f"Initialization error: {str(e)}")
@@ -178,7 +178,7 @@ async def ingest_documents(files: List[UploadFile] = File(...)):
     # Persist the vector store to disk
     if any(r.success and r.chunk_count > 0 for r in results):
         try:
-            vector_store.save(settings.vector_store_path)
+            vector_store.save(settings.resolved_vector_store_path)
         except Exception as e:
             logger.error(f"Failed to save vector store: {e}")
             
@@ -198,7 +198,7 @@ async def query_rag(payload: QueryRequest):
     """
     try:
         # 1. Get components
-        vector_store = get_vector_store(settings.vector_store_path)
+        vector_store = get_vector_store(settings.resolved_vector_store_path)
         embedder = get_embedding_client(payload.llm_provider)
         llm = get_llm_client(payload.llm_provider)
     except Exception as e:
@@ -274,7 +274,7 @@ async def search_vectors(
     Performs pure similarity search on vector store and returns matching text and scores.
     Useful for testing retrieval quality directly.
     """
-    vector_store = get_vector_store(settings.vector_store_path)
+    vector_store = get_vector_store(settings.resolved_vector_store_path)
     if not vector_store.chunks:
         return SearchResponse(results=[])
         
@@ -297,7 +297,7 @@ async def get_config():
     """
     Returns the current configuration settings.
     """
-    vector_store = get_vector_store(settings.vector_store_path)
+    vector_store = get_vector_store(settings.resolved_vector_store_path)
     return ConfigResponse(
         llm_provider=settings.llm_provider,
         openai_model=settings.openai_model,
@@ -306,7 +306,7 @@ async def get_config():
         gemini_embedding_model=settings.gemini_embedding_model,
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
-        vector_store_path=settings.vector_store_path,
+        vector_store_path=settings.resolved_vector_store_path,
         vector_store_loaded_chunks=len(vector_store.chunks)
     )
 
@@ -338,7 +338,7 @@ async def update_config(payload: UpdateConfigPayload):
             raise HTTPException(status_code=400, detail="chunk_overlap must be smaller than chunk_size")
         settings.chunk_overlap = payload.chunk_overlap
         
-    vector_store = get_vector_store(settings.vector_store_path)
+    vector_store = get_vector_store(settings.resolved_vector_store_path)
     
     return ConfigResponse(
         llm_provider=settings.llm_provider,
@@ -348,7 +348,7 @@ async def update_config(payload: UpdateConfigPayload):
         gemini_embedding_model=settings.gemini_embedding_model,
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
-        vector_store_path=settings.vector_store_path,
+        vector_store_path=settings.resolved_vector_store_path,
         vector_store_loaded_chunks=len(vector_store.chunks)
     )
 
@@ -358,10 +358,10 @@ async def clear_store():
     Clears all ingested documents and settings in the vector store.
     """
     try:
-        vector_store = get_vector_store(settings.vector_store_path)
+        vector_store = get_vector_store(settings.resolved_vector_store_path)
         vector_store.clear()
         try:
-            vector_store.save(settings.vector_store_path)
+            vector_store.save(settings.resolved_vector_store_path)
         except OSError as e:
             logger.warning(f"Could not write cleared vector store to disk (expected in read-only environments like Vercel): {e}")
         return {"status": "success", "message": "Vector store cleared."}

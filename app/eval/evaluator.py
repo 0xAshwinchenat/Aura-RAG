@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import logging
 import time
@@ -156,7 +157,7 @@ class RAGEvaluator:
         """
         Runs the full evaluation set, computes metrics, and aggregates results.
         """
-        vector_store = get_vector_store(settings.vector_store_path)
+        vector_store = get_vector_store(settings.resolved_vector_store_path)
         if not vector_store.chunks:
             return {
                 "success": False,

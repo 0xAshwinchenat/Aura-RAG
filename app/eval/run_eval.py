@@ -16,7 +16,7 @@ def main():
     print("=" * 60)
     
     # 1. Load active config & vector store
-    store_path = settings.vector_store_path
+    store_path = settings.resolved_vector_store_path
     vector_store = get_vector_store(store_path)
     
     if not vector_store.chunks:

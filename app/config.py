@@ -25,6 +25,20 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", validation_alias="HOST")
     port: int = Field(default=8000, validation_alias="PORT")
 
+    @property
+    def resolved_vector_store_path(self) -> str:
+        """Returns a writable path for the vector store.
+        On read-only filesystems (e.g. Vercel), falls back to /tmp/.
+        """
+        base_path = self.vector_store_path
+        # Check if the directory of the configured path is writable
+        parent_dir = os.path.dirname(os.path.abspath(base_path)) if os.path.dirname(base_path) else os.getcwd()
+        if os.access(parent_dir, os.W_OK):
+            return base_path
+        # Fallback to /tmp/ for read-only environments like Vercel
+        tmp_path = os.path.join("/tmp", os.path.basename(base_path))
+        return tmp_path
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
