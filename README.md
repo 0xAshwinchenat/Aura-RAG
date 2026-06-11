@@ -3,7 +3,7 @@
 A modular, robust, and beautiful Retrieval-Augmented Generation (RAG) system designed to ingest mixed-format documents, answer questions with precise metadata citations, prevent prompt injections, and evaluate retrieval/answering performance automatically.
 
 ## 🚀 Live Deployment
-* **Live App URL:** [https://aura-rag.render.com](https://aura-rag.render.com) *(Configure your API keys in the settings panel to run queries)*
+* **Live App URL:** [https://aura-rag.render.com](https://aura-rag.vercel.app) *(Configure your API keys in the settings panel to run queries)*
 
 ---
 
