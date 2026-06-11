@@ -55,7 +55,7 @@ class OpenAIEmbeddingClient(EmbeddingClient):
 
 
 class GeminiEmbeddingClient(EmbeddingClient):
-    def __init__(self, api_key: str, model: str = "models/text-embedding-004"):
+    def __init__(self, api_key: str, model: str = "models/gemini-embedding-001"):
         self.model = model
         import google.generativeai as genai
         genai.configure(api_key=api_key)
