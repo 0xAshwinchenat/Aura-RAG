@@ -63,7 +63,7 @@ class OpenAILLMClient(LLMClient):
 
 
 class GeminiLLMClient(LLMClient):
-    def __init__(self, api_key: str, model: str = "gemini-2.0-flash"):
+    def __init__(self, api_key: str, model: str = "gemini-3.5-flash"):
         self.model_name = model
         import google.generativeai as genai
         genai.configure(api_key=api_key)
@@ -71,10 +71,10 @@ class GeminiLLMClient(LLMClient):
 
     def _candidate_models(self) -> List[str]:
         candidates = [self.model_name]
+        if self.model_name != "gemini-3.5-flash":
+            candidates.append("gemini-3.5-flash")
         if self.model_name != "gemini-2.0-flash":
             candidates.append("gemini-2.0-flash")
-        if self.model_name != "gemini-2.0-flash-lite":
-            candidates.append("gemini-2.0-flash-lite")
         return candidates
 
     def generate_answer(self, query: str, chunks: List[DocumentChunk]) -> Dict[str, Any]:

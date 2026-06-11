@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     # LLM Settings
     llm_provider: str = Field(default="gemini", validation_alias="LLM_PROVIDER") # 'openai' or 'gemini'
     openai_model: str = Field(default="gpt-4o-mini", validation_alias="OPENAI_MODEL")
-    gemini_model: str = Field(default="gemini-2.0-flash", validation_alias="GEMINI_MODEL")
+    gemini_model: str = Field(default="gemini-3.5-flash", validation_alias="GEMINI_MODEL")
 
     # Embedding Settings
     openai_embedding_model: str = Field(default="text-embedding-3-small", validation_alias="OPENAI_EMBEDDING_MODEL")
